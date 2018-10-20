@@ -375,22 +375,32 @@ public class ElasticsearchUtil {
         StringBuffer stringBuffer = new StringBuffer();
 
         for (SearchHit searchHit : searchResponse.getHits().getHits()) {
-            searchHit.getSourceAsMap().put("id", searchHit.getId());
+            Map<String,Object> sourceMap=searchHit.getSourceAsMap();
+            if(sourceMap!=null)
+                sourceMap.put("id", searchHit.getId());
+            else{
+                sourceMap=new HashMap<>(  );
+                sourceMap.put( "id", searchHit.getId());
+            }
 
+            /*
+                在source为false时不能设置高亮显示,如果在此情况下设置了高亮显示或显示字段值则不会执行到
+                这个地方，在前面的返回响应中将会显示处理的结果为0
+             */
             if (StringUtils.isNotEmpty(highlightField)) {
 
-                System.out.println("遍历 高亮结果集，覆盖 正常结果集" + searchHit.getSourceAsMap());
+                System.out.println("遍历 高亮结果集，覆盖 正常结果集" + sourceMap);
                 Text[] text = searchHit.getHighlightFields().get(highlightField).getFragments();
 
                 if (text != null) {
                     for (Text str : text) {
                         stringBuffer.append(str.string());
                     }
-//遍历 高亮结果集，覆盖 正常结果集
-                    searchHit.getSourceAsMap().put(highlightField, stringBuffer.toString());
+                    //遍历 高亮结果集，覆盖 正常结果集
+                    sourceMap.put(highlightField, stringBuffer.toString());
                 }
             }
-            sourceList.add(searchHit.getSourceAsMap());
+            sourceList.add(sourceMap);
         }
 
         return sourceList;

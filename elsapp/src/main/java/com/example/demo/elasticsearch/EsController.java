@@ -59,11 +59,13 @@ public class EsController {
         Map<String,Object> mappings = new HashMap<>();
        // mappings.put("mappings",mappings);
         Map<String,Object> type = new HashMap<>();
+
+        //source.put( "enabled",false );  //如果有此属性，则无法查找到结果
         Map<String,Object> source=new HashMap<>(  );
-        //source.put( "enabled",false );
-        List<String> incList = new ArrayList();
-        incList.add( "_id" );
-        source.put("includes",incList);
+        source.put( "enabled",false );
+        //List<String> incList = new ArrayList();
+        //incList.add( "_id" );
+        //source.put("includes",incList);
         type.put("_source", source);
         mappings.put(esType, type);
 
@@ -214,7 +216,7 @@ public class EsController {
     @ResponseBody
     public String queryWildcardData() {
         QueryBuilder queryBuilder = QueryBuilders.wildcardQuery("name", "j-*466");
-        List<Map<String, Object>> list = ElasticsearchUtil.searchListData(indexName, esType, queryBuilder, 10, "id", null, null,null);
+        List<Map<String, Object>> list = ElasticsearchUtil.searchListData(indexName, esType, queryBuilder, 10, null, null, null,null);
         return JSONObject.toJSONString(list);
     }
 
